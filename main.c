@@ -34,7 +34,8 @@ int randomQueueSelectionSystem(int lambda, int mu) {
    int droppedPackets = 0;
    for(int i=0; i<10000; i++) {
       // Wait lambda milliseconds.
-      usleep(lambda);
+      int lambdaMilliseconds = lambda * 1000;
+      usleep(lambdaMilliseconds);
       // Generate a random number between 0 and 1.
       double random = randomNumber();
       // If the number is less than 0.5, assign the packet to queue1.
