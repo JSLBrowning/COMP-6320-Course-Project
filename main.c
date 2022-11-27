@@ -17,8 +17,18 @@ int main() {
 }
 
 
-// Create two queue data structures, one for each queue in the system.
-// Each queue will "process" packets with a service rate of mu.
+int random_queue_selection_system(int lambda, int mu) {
+   // Packets arrive following a Poisson process of rate lambda.
+   // Packets are assigned to one of the two queues at random.
+   // If the queue is full (one packet being processed and nine in waiting), the new packet is dropped.
+   // Packets are processed at an exponentially distributed rate with mean 1/mu.
+}
 
-// Create a packet data structure.
-// Packets will be sent to the system with an arrival rate of lambda.
+
+int min_queue_selection_system(int lambda, int mu) {
+   // Packets arrive following a Poisson process of rate lambda.
+   // Packets are assigned to whichever queue has the fewest packets in waiting.
+      // Random queue if both are the same length.
+   // If the queue is full (one packet being processed and nine in waiting), the new packet is dropped.
+   // Packets are processed at an exponentially distributed rate with mean 1/mu.
+}
