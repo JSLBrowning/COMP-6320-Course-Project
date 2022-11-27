@@ -31,6 +31,7 @@ int randomQueueSelectionSystem(int lambda, int mu) {
 
    // Packets arrive following a Poisson process of rate lambda.
    // Packets are assigned to one of the two queues at random.
+   int droppedPackets = 0;
    for(int i=0; i<10000; i++) {
       // Wait lambda milliseconds.
       usleep(lambda);
@@ -39,9 +40,19 @@ int randomQueueSelectionSystem(int lambda, int mu) {
       // If the number is less than 0.5, assign the packet to queue1.
       // Otherwise, assign the packet to queue2.
       if(random < 0.5) {
-         queue1++;
+         if (queue1 < 10) {
+            queue1++;
+         } else {
+            // Packet is dropped.
+            droppedPackets++;
+         }
       } else {
-         queue2++;
+         if (queue2 < 10) {
+            queue2++;
+         } else {
+            // Packet is dropped.
+            droppedPackets++;
+         }
       }
    }
 
