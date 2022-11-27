@@ -10,10 +10,17 @@
  *H*/
 
 #include <stdio.h>
+#include <unistd.h>
+RAND_MAX = 32767;
 
 int main() {
    printf("Hello.");
    return 0;
+}
+
+
+double randomNumber() {
+   return (double)rand() / (double)RAND_MAX;
 }
 
 
@@ -24,6 +31,19 @@ int randomQueueSelectionSystem(int lambda, int mu) {
 
    // Packets arrive following a Poisson process of rate lambda.
    // Packets are assigned to one of the two queues at random.
+   for(int i=0; i<10000; i++) {
+      // Wait lambda milliseconds.
+      usleep(lambda);
+      // Generate a random number between 0 and 1.
+      double random = randomNumber();
+      // If the number is less than 0.5, assign the packet to queue1.
+      // Otherwise, assign the packet to queue2.
+      if(random < 0.5) {
+         queue1++;
+      } else {
+         queue2++;
+      }
+   }
 
    // If the queue is full (one packet being processed and nine in waiting), the new packet is dropped.
    // Packets are processed at an exponentially distributed rate with mean 1/mu.
