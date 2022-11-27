@@ -24,6 +24,20 @@ double randomNumber() {
 }
 
 
+double randomPoisson(double lambda) {
+   // Generate a random number with a Poisson distribution,
+   // where lambda is the mean of the distribution.
+   double L = exp(-lambda);
+   double p = 1.0;
+   int k = 0;
+   do {
+      k++;
+      p *= randomNumber();
+   } while (p > L);
+   return (double)k - 1.0;
+}
+
+
 int randomQueueSelectionSystem(int lambda, int mu) {
    // Since this is just a simulation, queues can just be ints.
    int queue1 = 0;
@@ -34,8 +48,8 @@ int randomQueueSelectionSystem(int lambda, int mu) {
    int droppedPackets = 0;
    for(int i=0; i<10000; i++) {
       // Wait lambda milliseconds.
-      int lambdaMilliseconds = lambda * 1000;
-      usleep(lambdaMilliseconds);
+      int arrivalMilliseconds = (int)(randomPoisson(lambda) * 1000);
+      usleep(arrivalMilliseconds);
       // Generate a random number between 0 and 1.
       double random = randomNumber();
       // If the number is less than 0.5, assign the packet to queue1.
