@@ -14,11 +14,12 @@ RAND_MAX = 32767;
 
 
 double randomNumber() {
+   // Generate a random number between 0 and 1 with a uniform distribution.
    return (double)rand() / (double)RAND_MAX;
 }
 
 
-double randomPoisson(double lambda) {
+int randomPoisson(int lambda) {
    // Generate a random number with a Poisson distribution,
    // where lambda is the mean of the distribution.
    double L = exp(-lambda);
@@ -28,14 +29,7 @@ double randomPoisson(double lambda) {
       k++;
       p *= randomNumber();
    } while (p > L);
-   return (double)k - 1.0;
-}
-
-
-double randomExponential(double mu) {
-   // Generate a random number with an exponential distribution,
-   // where mu is the mean of the distribution.
-   return -log(randomNumber()) / mu;
+   return k - 1;
 }
 
 
@@ -76,13 +70,13 @@ int randomQueueSelectionSystem(int lambda, int mu) {
       if (queueOneDepartureCountdown == 0) {
          if (queue1 > 0) {
             queue1--;
-            queueOneDepartureCountdown = randomExponential(mu);
+            queueOneDepartureCountdown = randomPoisson(mu);
          }
       }
       if (queueTwoDepartureCountdown == 0) {
          if (queue2 > 0) {
             queue2--;
-            queueTwoDepartureCountdown = randomExponential(mu);
+            queueTwoDepartureCountdown = randomPoisson(mu);
          }
       }
       arrivalCountdown--;
@@ -90,15 +84,84 @@ int randomQueueSelectionSystem(int lambda, int mu) {
       queueTwoDepartureCountdown--;
    }
 
-   // If the queue is full (one packet being processed and nine in waiting), the new packet is dropped.
-   // Packets are processed at an exponentially distributed rate with mean 1/mu.
+   printf("DROPPED PACKETS: %d", droppedPackets);
+   int successfulPackets = packetsArrived - droppedPackets;
+   printf("PACKETS ARRIVED: %d", successfulPackets);
 }
 
 
 int minQueueSelectionSystem(int lambda, int mu) {
-   // Packets arrive following a Poisson process of rate lambda.
-   // Packets are assigned to whichever queue has the fewest packets in waiting.
-      // Random queue if both are the same length.
-   // If the queue is full (one packet being processed and nine in waiting), the new packet is dropped.
-   // Packets are processed at an exponentially distributed rate with mean 1/mu.
+   // Since this is just a simulation, queues can just be ints.
+   int queue1 = 0;
+   int queue2 = 0;
+   int arrivalCountdown = 0;
+   int queueOneDepartureCountdown = 0;
+   int queueTwoDepartureCountdown = 0;
+   int packetsArrived = 0;
+   int droppedPackets = 0;
+
+
+   while( packetsArrived < 10000 && queue1 > 0 && queue2 > 0 ) {
+      if (arrivalCountdown == 0) {
+         // Generate a random number with a Poisson distribution,
+         // where lambda is the mean of the distribution.
+         arrivalCountdown = randomPoisson(lambda);
+         if (queue1 < 10 && queue2 < 10) {
+            // If both queues are less than 10, put it in the shortest queue.
+            if (queue1 < queue2) {
+               queue1++;
+            } else if (queue2 < queue1) {
+               queue2++;
+            } else {
+               // If the queues are equal, randomly select one.
+               if (randomNumber() < 0.5) {
+                  queue1++;
+               } else {
+                  queue2++;
+               }
+            }
+         } else if (queue1 < 10 && queue2 >= 10) {
+            queue1++;
+            packetsArrived++;
+         } else if (queue2 < 10 && queue1 >= 10) {
+            queue2++;
+            packetsArrived++;
+         } else {
+            droppedPackets++;
+            packetsArrived++;
+         }
+      }
+      if (queueOneDepartureCountdown == 0) {
+         if (queue1 > 0) {
+            queue1--;
+            queueOneDepartureCountdown = randomPoisson(mu);
+         }
+      }
+      if (queueTwoDepartureCountdown == 0) {
+         if (queue2 > 0) {
+            queue2--;
+            queueTwoDepartureCountdown = randomPoisson(mu);
+         }
+      }
+      arrivalCountdown--;
+      queueOneDepartureCountdown--;
+      queueTwoDepartureCountdown--;
+   }
+
+   printf("DROPPED PACKETS: %d", droppedPackets);
+   int successfulPackets = packetsArrived - droppedPackets;
+   printf("PACKETS ARRIVED: %d", successfulPackets);
+}
+
+
+int main(int choice, int lambda, int mu) {
+   if(choice == 1) {
+      randomQueueSelectionSystem(lambda, mu);
+   } else if(choice == 2) {
+      minQueueSelectionSystem(lambda, mu);
+   } else {
+      printf("Invalid parameters.\n");
+      printf("Usage: ./main <choice> <lambda> <mu>\n");
+      printf("Choice: 1 for random queue selection, 2 for minimum queue selection.\n");
+   }
 }
