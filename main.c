@@ -8,16 +8,9 @@
  * AUTHORS:
  *       James S. L. Browning and Austin David Preston
  *H*/
-
 #include <stdio.h>
 #include <unistd.h>
 RAND_MAX = 32767;
-
-
-int main() {
-   printf("Hello.");
-   return 0;
-}
 
 
 double randomNumber() {
@@ -39,38 +32,62 @@ double randomPoisson(double lambda) {
 }
 
 
+double randomExponential(double mu) {
+   // Generate a random number with an exponential distribution,
+   // where mu is the mean of the distribution.
+   return -log(randomNumber()) / mu;
+}
+
+
 int randomQueueSelectionSystem(int lambda, int mu) {
    // Since this is just a simulation, queues can just be ints.
    int queue1 = 0;
    int queue2 = 0;
-
-
-   // Packets arrive following a Poisson process of rate lambda.
-   // Packets are assigned to one of the two queues at random.
+   int arrivalCountdown = 0;
+   int queueOneDepartureCountdown = 0;
+   int queueTwoDepartureCountdown = 0;
+   int packetsArrived = 0;
    int droppedPackets = 0;
-   for(int i=0; i<10000; i++) {
-      // Wait lambda milliseconds.
-      int arrivalMilliseconds = (int)(randomPoisson(lambda) * 1000);
-      usleep(arrivalMilliseconds);
-      // Generate a random number between 0 and 1.
-      double random = randomNumber();
-      // If the number is less than 0.5, assign the packet to queue1.
-      // Otherwise, assign the packet to queue2.
-      if(random < 0.5) {
-         if (queue1 < 10) {
+
+
+   while( packetsArrived < 10000 && queue1 > 0 && queue2 > 0 ) {
+      if (arrivalCountdown == 0) {
+         // Generate a random number with a Poisson distribution,
+         // where lambda is the mean of the distribution.
+         arrivalCountdown = randomPoisson(lambda);
+         if (queue1 < 10 && queue2 < 10) {
+            // If both queues are less than 10, randomly select one.
+            if (randomNumber() < 0.5) {
+               queue1++;
+            } else {
+               queue2++;
+            }
+         } else if (queue1 < 10 && queue2 >= 10) {
             queue1++;
-         } else {
-            // Packet is dropped.
-            droppedPackets++;
-         }
-      } else {
-         if (queue2 < 10) {
+            packetsArrived++;
+         } else if (queue2 < 10 && queue1 >= 10) {
             queue2++;
+            packetsArrived++;
          } else {
-            // Packet is dropped.
             droppedPackets++;
+            packetsArrived++;
          }
       }
+      if (queueOneDepartureCountdown == 0) {
+         if (queue1 > 0) {
+            queue1--;
+            queueOneDepartureCountdown = randomExponential(mu);
+         }
+      }
+      if (queueTwoDepartureCountdown == 0) {
+         if (queue2 > 0) {
+            queue2--;
+            queueTwoDepartureCountdown = randomExponential(mu);
+         }
+      }
+      arrivalCountdown--;
+      queueOneDepartureCountdown--;
+      queueTwoDepartureCountdown--;
    }
 
    // If the queue is full (one packet being processed and nine in waiting), the new packet is dropped.
