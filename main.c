@@ -45,28 +45,24 @@ int randomQueueSelectionSystem(int lambda, int mu) {
    int droppedPackets = 0;
 
 
-   while( packetsArrived < 10000 && queue1 > 0 && queue2 > 0 ) {
+   while( packetsArrived < 10000 || (queue1 > 0 && queue2 > 0) ) {
       if (arrivalCountdown == 0 && packetsArrived < 10000) {
          // Send the new arrival to the queues.
          if (queue1 < 10 && queue2 < 10) {
             // If both queues are less than 10, randomly select one.
             if (randomNumber() < 0.5) {
                queue1++;
-               packetsArrived++;
             } else {
                queue2++;
-               packetsArrived++;
             }
          } else if (queue1 < 10 && queue2 == 10) {
             queue1++;
-            packetsArrived++;
          } else if (queue2 < 10 && queue1 == 10) {
             queue2++;
-            packetsArrived++;
          } else {
             droppedPackets++;
-            packetsArrived++;
          }
+         packetsArrived++;
 
          // Regenerate the arrival countdown.
          arrivalCountdown = randomPoisson(lambda);
@@ -109,7 +105,7 @@ int minQueueSelectionSystem(int lambda, int mu) {
    int droppedPackets = 0;
 
 
-   while( packetsArrived < 10000 && queue1 > 0 && queue2 > 0 ) {
+   while( packetsArrived < 10000 || (queue1 > 0 && queue2 > 0) ) {
       if (arrivalCountdown == 0 && packetsArrived < 10000) {
          // Send the new arrival to the queues.
          if (queue1 < 10 && queue2 < 10) {
