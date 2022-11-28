@@ -13,6 +13,7 @@
 #include <unistd.h>
 RAND_MAX = 32767;
 
+
 int main() {
    printf("Hello.");
    return 0;
@@ -42,6 +43,7 @@ int randomQueueSelectionSystem(int lambda, int mu) {
    // Since this is just a simulation, queues can just be ints.
    int queue1 = 0;
    int queue2 = 0;
+
 
    // Packets arrive following a Poisson process of rate lambda.
    // Packets are assigned to one of the two queues at random.
