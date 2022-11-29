@@ -71,15 +71,15 @@ int randomQueueSelectionSystem(int lambda, int mu) {
       if (queueOneDepartureCountdown == 0) {
          if (queue1 > 0) {
             queue1--;
-            queueOneDepartureCountdown = randomPoisson(mu);
          }
+         queueOneDepartureCountdown = randomPoisson(mu);
       }
 
       if (queueTwoDepartureCountdown == 0) {
          if (queue2 > 0) {
             queue2--;
-            queueTwoDepartureCountdown = randomPoisson(mu);
          }
+         queueTwoDepartureCountdown = randomPoisson(mu);
       }
 
       arrivalCountdown--;
@@ -143,15 +143,15 @@ int minQueueSelectionSystem(int lambda, int mu) {
       if (queueOneDepartureCountdown == 0) {
          if (queue1 > 0) {
             queue1--;
-            queueOneDepartureCountdown = randomPoisson(mu);
          }
+         queueOneDepartureCountdown = randomPoisson(mu);
       }
 
       if (queueTwoDepartureCountdown == 0) {
          if (queue2 > 0) {
             queue2--;
-            queueTwoDepartureCountdown = randomPoisson(mu);
          }
+         queueTwoDepartureCountdown = randomPoisson(mu);
       }
 
       arrivalCountdown--;
