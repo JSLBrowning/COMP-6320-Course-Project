@@ -38,9 +38,9 @@ int randomQueueSelectionSystem(int lambda, int mu) {
    // Since this is just a simulation, queues can just be ints.
    int queue1 = 0;
    int queue2 = 0;
-   int arrivalCountdown = 0;
-   int queueOneDepartureCountdown = 0;
-   int queueTwoDepartureCountdown = 0;
+   int arrivalCountdown = randomPoisson(lambda);
+   int queueOneDepartureCountdown = randomPoisson(mu);
+   int queueTwoDepartureCountdown = randomPoisson(mu);
    int packetsArrived = 0;
    int droppedPackets = 0;
 
