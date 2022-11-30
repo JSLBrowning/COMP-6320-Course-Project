@@ -1,10 +1,10 @@
 /*H*
  * FILENAME: main.c
- * 
+ *
  * DESCRIPTION:
  *       Simulate a two-queue system, where each queue in the system
  *       has a capacity of 10 packets (including the one in the server).
- * 
+ *
  * AUTHORS:
  *       James S. L. Browning and Austin David Preston
  *H*/
@@ -15,37 +15,40 @@
 #include <unistd.h>
 #include <time.h>
 
-double randomNumber() {
+double randomNumber()
+{
   // Generate a random number between 0 and 1 with a uniform distribution.
   return (double)rand() / (double)RAND_MAX;
 }
 
-
-int randomPoisson(int lambda) {
+int randomPoisson(int lambda)
+{
   // Generate a random number with a Poisson distribution,
   // where lambda is the mean of the distribution.
 
   double L = exp(-lambda);
   double p = 1.0;
   int k = 0;
-  
+
   // Keep recomputing if k = 0.
-  while ( (k - 1) < 1) {
+  while ((k - 1) < 1)
+  {
     k = 0, p = 1.0;
 
-    do {
+    do
+    {
       k++;
       p *= randomNumber();
     } while (p > L);
 
-    printf("%d\n", k-1);
+    printf("%d\n", k - 1);
   }
 
   return k - 1;
 }
 
-
-int randomQueueSelectionSystem(int lambda, int mu) {
+int randomQueueSelectionSystem(int lambda, int mu)
+{
   // Since this is just a simulation, queues can just be ints.
   int queue1 = 0;
   int queue2 = 0;
@@ -64,7 +67,8 @@ int randomQueueSelectionSystem(int lambda, int mu) {
   printf("Arrival Countdown is: %d\n", arrivalCountdown);
   printf("Queue Countdown is: %d\n", queueCountdown);
 
-  while( packetsArrived < 10000 || (queue1 > 0 || queue2 > 0) ) {
+  while (packetsArrived < 10000 || (queue1 > 0 || queue2 > 0))
+  {
     // Debugging; Inspect the queue during the loop.
     //    printf("Packet Number: %d\n", packetsArrived);
     //    printf("Queue 1: %d\n", queue1);
@@ -72,49 +76,70 @@ int randomQueueSelectionSystem(int lambda, int mu) {
     //    printf("Queue 2: %d\n", queue2);
     //    printf("Queue 2 Timer: %d\n", queue2Timer);
 
-    if (arrivalTimer == 0 && packetsArrived < 10000) {
+    if (arrivalTimer == 0 && packetsArrived < 10000)
+    {
       packetsArrived++;
 
       // Regenerate the arrival countdown.
-      arrivalTimer = arrivalCountdown;      
+      arrivalTimer = arrivalCountdown;
 
       // Send the new arrival to the queues.
-      if (queue1 < 10 && queue2 < 10) {
-	// If both queues are less than 10, randomly select one.
-	if (randomNumber() < 0.5) {
-	  if (queue1 != 0) {
-	    queue1++;
-	  } else {
-	    queue1++;
-	    queue1Timer = queueCountdown;
-	  }
-	} else {
-	  if (queue2 != 0) {
-	    queue2++;
-	  } else {
-	    queue2++;
-	    queue2Timer = queueCountdown;
-	  }
-	}
-      } else if (queue1 < 10 && queue2 == 10) {
-	queue1++;
-      } else if (queue2 < 10 && queue1 == 10) {
-	queue2++;
-      } else {
-	droppedPackets++;
+      if (queue1 < 10 && queue2 < 10)
+      {
+        // If both queues are less than 10, randomly select one.
+        if (randomNumber() < 0.5)
+        {
+          if (queue1 != 0)
+          {
+            queue1++;
+          }
+          else
+          {
+            queue1++;
+            queue1Timer = queueCountdown;
+          }
+        }
+        else
+        {
+          if (queue2 != 0)
+          {
+            queue2++;
+          }
+          else
+          {
+            queue2++;
+            queue2Timer = queueCountdown;
+          }
+        }
+      }
+      else if (queue1 < 10 && queue2 == 10)
+      {
+        queue1++;
+      }
+      else if (queue2 < 10 && queue1 == 10)
+      {
+        queue2++;
+      }
+      else
+      {
+        droppedPackets++;
       }
     }
-  
-    if (queue1Timer == 0) {
-      if (queue1 > 0) {
-	queue1--;
+
+    if (queue1Timer == 0)
+    {
+      if (queue1 > 0)
+      {
+        queue1--;
       }
       queue1Timer = queueCountdown;
     }
-    
-    if (queue2Timer == 0) {
-      if (queue2 > 0) {
-	queue2--;
+
+    if (queue2Timer == 0)
+    {
+      if (queue2 > 0)
+      {
+        queue2--;
       }
       queue2Timer = queueCountdown;
     }
@@ -122,7 +147,7 @@ int randomQueueSelectionSystem(int lambda, int mu) {
     arrivalTimer--;
     queue1Timer--;
     queue2Timer--;
-    
+
     // Debugging; Watch the simulation at a slower pace
     //    sleep(1);
   }
@@ -133,8 +158,8 @@ int randomQueueSelectionSystem(int lambda, int mu) {
   return successfulPackets;
 }
 
-
-int minQueueSelectionSystem(int lambda, int mu) {
+int minQueueSelectionSystem(int lambda, int mu)
+{
   // Since this is just a simulation, queues can just be ints.
   int queue1 = 0;
   int queue2 = 0;
@@ -144,52 +169,72 @@ int minQueueSelectionSystem(int lambda, int mu) {
   int packetsArrived = 0;
   int droppedPackets = 0;
 
-
-  while( packetsArrived < 10000 || (queue1 > 0 && queue2 > 0) ) {
-    if (arrivalCountdown == 0 && packetsArrived < 10000) {
+  while (packetsArrived < 10000 || (queue1 > 0 && queue2 > 0))
+  {
+    if (arrivalCountdown == 0 && packetsArrived < 10000)
+    {
       // Send the new arrival to the queues.
-      if (queue1 < 10 && queue2 < 10) {
-	if (queue1 < queue2) {
-	  queue1++;
-	  packetsArrived++;
-	} else if (queue2 < queue1) {
-	  queue2++;
-	  packetsArrived++;
-	} else {
-	  // If the queues are equal, randomly select one.
-	  if (randomNumber() < 0.5) {
-	    queue1++;
-	    packetsArrived++;
-	  } else {
-	    queue2++;
-	    packetsArrived++;
-	  }
-	}
-      } else if (queue1 < 10 && queue2 == 10) {
-	queue1++;
-	packetsArrived++;
-      } else if (queue2 < 10 && queue1 == 10) {
-	queue2++;
-	packetsArrived++;
-      } else {
-	droppedPackets++;
-	packetsArrived++;
+      if (queue1 < 10 && queue2 < 10)
+      {
+        if (queue1 < queue2)
+        {
+          queue1++;
+          packetsArrived++;
+        }
+        else if (queue2 < queue1)
+        {
+          queue2++;
+          packetsArrived++;
+        }
+        else
+        {
+          // If the queues are equal, randomly select one.
+          if (randomNumber() < 0.5)
+          {
+            queue1++;
+            packetsArrived++;
+          }
+          else
+          {
+            queue2++;
+            packetsArrived++;
+          }
+        }
+      }
+      else if (queue1 < 10 && queue2 == 10)
+      {
+        queue1++;
+        packetsArrived++;
+      }
+      else if (queue2 < 10 && queue1 == 10)
+      {
+        queue2++;
+        packetsArrived++;
+      }
+      else
+      {
+        droppedPackets++;
+        packetsArrived++;
       }
 
       // Regenerate the arrival countdown.
       arrivalCountdown = randomPoisson(lambda);
     }
 
-    if (queueOneDepartureCountdown == 0) {
-      if (queue1 > 0) {
-	queue1--;
+    if (queueOneDepartureCountdown == 0)
+    {
+      if (queue1 > 0)
+      {
+        queue1--;
       }
       queueOneDepartureCountdown = randomPoisson(mu);
     }
 
-    if (queueTwoDepartureCountdown == 0) {
-      if (queue2 > 0) {
-	queue2--;
+    if (queueTwoDepartureCountdown == 0)
+    {
+      if (queue2 > 0)
+      {
+        queue2--;
       }
       queueTwoDepartureCountdown = randomPoisson(mu);
     }
@@ -205,14 +250,17 @@ int minQueueSelectionSystem(int lambda, int mu) {
   return successfulPackets;
 }
 
-
-int main(int argc, char *argv[]) {
-  if (argc != 4) {
+int main(int argc, char *argv[])
+{
+  if (argc != 4)
+  {
     printf("Invalid parameters.\n");
     printf("Usage: ./main <choice> <lambda> <mu>\n");
     printf("Choice: 1 for random queue selection, 2 for minimum queue selection.\n");
     return 1;
-  } else {
+  }
+  else
+  {
     int choice = atoi(argv[1]);
     int lambda = atoi(argv[2]);
     int mu = atoi(argv[3]);
@@ -220,11 +268,16 @@ int main(int argc, char *argv[]) {
     // Seed random number
     srand(time(0));
 
-    if (choice == 1) {
+    if (choice == 1)
+    {
       randomQueueSelectionSystem(lambda, mu);
-    } else if (choice == 2) {
+    }
+    else if (choice == 2)
+    {
       minQueueSelectionSystem(lambda, mu);
-    } else {
+    }
+    else
+    {
       printf("Invalid parameters.\n");
       printf("Usage: ./main <choice> <lambda> <mu>\n");
       printf("Choice: 1 for random queue selection, 2 for minimum queue selection.\n");
