@@ -53,19 +53,12 @@ int randomQueueSelectionSystem(int lambda, int mu)
   int queue1 = 0;
   int queue2 = 0;
 
-  int arrivalCountdown = randomPoisson(lambda);
-  int queueCountdown = randomPoisson(mu);
-
   int packetsArrived = 0;
   int droppedPackets = 0;
 
   int arrivalTimer = 0;
   int queue1Timer = -1;
   int queue2Timer = -1;
-
-  // Debugging; Inspect the arrival and queue countdown timers.
-  printf("Arrival Countdown is: %d\n", arrivalCountdown);
-  printf("Queue Countdown is: %d\n", queueCountdown);
 
   while (packetsArrived < 10000 || (queue1 > 0 || queue2 > 0))
   {
@@ -81,49 +74,39 @@ int randomQueueSelectionSystem(int lambda, int mu)
       packetsArrived++;
 
       // Regenerate the arrival countdown.
-      arrivalTimer = arrivalCountdown;
+      arrivalTimer = randomPoisson(lambda);
 
-      // Send the new arrival to the queues.
-      if (queue1 < 10 && queue2 < 10)
-      {
-        // If both queues are less than 10, randomly select one.
+      // Randomly select a queue, then add the packet if that queue is not full.
         if (randomNumber() < 0.5)
         {
-          if (queue1 != 0)
+          if (queue1 != 0 && queue1 < 10)
           {
             queue1++;
           }
-          else
+          else if (queue1 == 0)
           {
             queue1++;
-            queue1Timer = queueCountdown;
+            queue1Timer = randomPoisson(mu);
+          } else if (queue1 == 10)
+          {
+            droppedPackets++;
           }
         }
         else
         {
-          if (queue2 != 0)
+          if (queue2 != 0 && queue2 < 10)
           {
             queue2++;
           }
-          else
+          else if (queue2 == 0)
           {
             queue2++;
-            queue2Timer = queueCountdown;
+            queue2Timer = randomPoisson(mu);
+          } else if (queue2 == 10)
+          {
+            droppedPackets++;
           }
         }
-      }
-      else if (queue1 < 10 && queue2 == 10)
-      {
-        queue1++;
-      }
-      else if (queue2 < 10 && queue1 == 10)
-      {
-        queue2++;
-      }
-      else
-      {
-        droppedPackets++;
-      }
     }
 
     if (queue1Timer == 0)
@@ -132,7 +115,7 @@ int randomQueueSelectionSystem(int lambda, int mu)
       {
         queue1--;
       }
-      queue1Timer = queueCountdown;
+      queue1Timer = randomPoisson(mu);
     }
 
     if (queue2Timer == 0)
@@ -141,7 +124,7 @@ int randomQueueSelectionSystem(int lambda, int mu)
       {
         queue2--;
       }
-      queue2Timer = queueCountdown;
+      queue2Timer = randomPoisson(mu);
     }
 
     arrivalTimer--;
