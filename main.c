@@ -40,8 +40,6 @@ int randomPoisson(int lambda)
             k++;
             p *= randomNumber();
         } while (p > L);
-
-        printf("%d\n", k - 1);
     }
 
     return k - 1;
@@ -53,9 +51,6 @@ int randomQueueSelectionSystem(int lambda, int mu)
     int queue1 = 0;
     int queue2 = 0;
 
-    int arrivalCountdown = randomPoisson(lambda);
-    int queueCountdown = randomPoisson(mu);
-
     int packetsArrived = 0;
     int droppedPackets = 0;
 
@@ -63,9 +58,8 @@ int randomQueueSelectionSystem(int lambda, int mu)
     int queue1Timer = -1;
     int queue2Timer = -1;
 
-    // Debugging; Inspect the arrival and queue countdown timers.
-    printf("Arrival Countdown is: %d\n", arrivalCountdown);
-    printf("Queue Countdown is: %d\n", queueCountdown);
+    int timeElapsed = 0;
+    double averageQueueLength = 0.0;
 
     while (packetsArrived < 10000 || (queue1 > 0 || queue2 > 0))
     {
@@ -84,44 +78,132 @@ int randomQueueSelectionSystem(int lambda, int mu)
             arrivalTimer = randomPoisson(lambda);
 
             // Send the new arrival to the queues.
-            if (queue1 < 10 && queue2 < 10)
+            if (randomNumber() < 0.5)
             {
-                // If both queues are less than 10, randomly select one.
-                if (randomNumber() < 0.5)
+                if (queue1 == 0)
                 {
-                    if (queue1 != 0)
-                    {
-                        queue1++;
-                    }
-                    else
-                    {
-                        queue1++;
-                        queue1Timer = randomPoisson(mu);
-                    }
+                    queue1++;
+                    queue1Timer = randomPoisson(mu);
+                }
+                else if (queue1 < 10)
+                {
+                    queue1++;
                 }
                 else
                 {
-                    if (queue2 != 0)
-                    {
-                        queue2++;
-                    }
-                    else
-                    {
-                        queue2++;
-                        queue2Timer = randomPoisson(mu);
-                    }
+                    droppedPackets++;
                 }
-            }
-            else if (queue1 < 10 && queue2 == 10)
-            {
-                queue1++;
-            }
-            else if (queue2 < 10 && queue1 == 10)
-            {
-                queue2++;
             }
             else
             {
+                if (queue2 == 0)
+                {
+                    queue2++;
+                    queue2Timer = randomPoisson(mu);
+                }
+                else if (queue2 < 10)
+                {
+                    queue2++;
+                }
+                else
+                {
+                    droppedPackets++;
+                }
+            }
+        }
+
+        if (queue1Timer == 0)
+        {
+            if (queue1 > 0)
+            {
+                queue1--;
+            }
+            queue1Timer = randomPoisson(mu);
+        }
+
+        if (queue2Timer == 0)
+        {
+            if (queue2 > 0)
+            {
+                queue2--;
+            }
+            queue2Timer = randomPoisson(mu);
+        }
+
+        timeElapsed++;
+        arrivalTimer--;
+        queue1Timer--;
+        queue2Timer--;
+
+        averageQueueLength += (double)(queue1 + queue2) / 2.0;
+    }
+
+    printf("DROPPED PACKETS: %d\n", droppedPackets);
+    int successfulPackets = packetsArrived - droppedPackets;
+    printf("PACKETS ARRIVED: %d\n", successfulPackets);
+    double blockingProbability = (double)droppedPackets / (double)packetsArrived;
+    printf("BLOCKING PROBABILITY: %f\n", blockingProbability);
+    double finalAverageQueueLength = averageQueueLength / (double)timeElapsed;
+    printf("AVERAGE QUEUE LENGTH: %f\n", finalAverageQueueLength);
+    return successfulPackets;
+}
+
+int minQueueSelectionSystem(int lambda, int mu)
+{
+    // Since this is just a simulation, queues can just be ints.
+    int queue1 = 0;
+    int queue2 = 0;
+
+    int packetsArrived = 0;
+    int droppedPackets = 0;
+
+    int arrivalTimer = 0;
+    int queue1Timer = -1;
+    int queue2Timer = -1;
+
+    int timeElapsed = 0;
+    double averageQueueLength = 0.0;
+
+    while (packetsArrived < 10000 || (queue1 > 0 || queue2 > 0))
+    {
+        // Debugging; Inspect the queue during the loop.
+        //    printf("Packet Number: %d\n", packetsArrived);
+        //    printf("Queue 1: %d\n", queue1);
+        //    printf("Queue 1 Timer: %d\n", queue1Timer);
+        //    printf("Queue 2: %d\n", queue2);
+        //    printf("Queue 2 Timer: %d\n", queue2Timer);
+
+        if (arrivalTimer == 0 && packetsArrived < 10000)
+        {
+            packetsArrived++;
+
+            // Regenerate the arrival countdown.
+            arrivalTimer = randomPoisson(lambda);
+
+            // Send the new arrival to the queues.
+            if (queue1 < 10 && queue1 < queue2) {
+                queue1++;
+                if (queue1 == 1) {
+                    queue1Timer = randomPoisson(mu);
+                }
+            } else if (queue2 < 10 && queue2 < queue1) {
+                queue2++;
+                if (queue2 == 1) {
+                    queue2Timer = randomPoisson(mu);
+                }
+            } else if (queue1 < 10 && queue1 == queue2) {
+                if (randomNumber() < 0.5) {
+                    queue1++;
+                    if (queue1 == 1) {
+                        queue1Timer = randomPoisson(mu);
+                    }
+                } else {
+                    queue2++;
+                    if (queue2 == 1) {
+                        queue2Timer = randomPoisson(mu);
+                    }
+                }
+            } else {
                 droppedPackets++;
             }
         }
@@ -144,109 +226,21 @@ int randomQueueSelectionSystem(int lambda, int mu)
             queue2Timer = randomPoisson(mu);
         }
 
+        timeElapsed++;
         arrivalTimer--;
         queue1Timer--;
         queue2Timer--;
 
-        // Debugging; Watch the simulation at a slower pace
-        //    sleep(1);
+        averageQueueLength += (double)(queue1 + queue2) / 2.0;
     }
 
     printf("DROPPED PACKETS: %d\n", droppedPackets);
     int successfulPackets = packetsArrived - droppedPackets;
     printf("PACKETS ARRIVED: %d\n", successfulPackets);
-    return successfulPackets;
-}
-
-int minQueueSelectionSystem(int lambda, int mu)
-{
-    // Since this is just a simulation, queues can just be ints.
-    int queue1 = 0;
-    int queue2 = 0;
-    int arrivalCountdown = 0;
-    int queueOneDepartureCountdown = 0;
-    int queueTwoDepartureCountdown = 0;
-    int packetsArrived = 0;
-    int droppedPackets = 0;
-
-    while (packetsArrived < 10000 || (queue1 > 0 && queue2 > 0))
-    {
-        if (arrivalCountdown == 0 && packetsArrived < 10000)
-        {
-            // Send the new arrival to the queues.
-            if (queue1 < 10 && queue2 < 10)
-            {
-                if (queue1 < queue2)
-                {
-                    queue1++;
-                    packetsArrived++;
-                }
-                else if (queue2 < queue1)
-                {
-                    queue2++;
-                    packetsArrived++;
-                }
-                else
-                {
-                    // If the queues are equal, randomly select one.
-                    if (randomNumber() < 0.5)
-                    {
-                        queue1++;
-                        packetsArrived++;
-                    }
-                    else
-                    {
-                        queue2++;
-                        packetsArrived++;
-                    }
-                }
-            }
-            else if (queue1 < 10 && queue2 == 10)
-            {
-                queue1++;
-                packetsArrived++;
-            }
-            else if (queue2 < 10 && queue1 == 10)
-            {
-                queue2++;
-                packetsArrived++;
-            }
-            else
-            {
-                droppedPackets++;
-                packetsArrived++;
-            }
-
-            // Regenerate the arrival countdown.
-            arrivalCountdown = randomPoisson(lambda);
-        }
-
-        if (queueOneDepartureCountdown == 0)
-        {
-            if (queue1 > 0)
-            {
-                queue1--;
-            }
-            queueOneDepartureCountdown = randomPoisson(mu);
-        }
-
-        if (queueTwoDepartureCountdown == 0)
-        {
-            if (queue2 > 0)
-            {
-                queue2--;
-            }
-            queueTwoDepartureCountdown = randomPoisson(mu);
-        }
-
-        arrivalCountdown--;
-        queueOneDepartureCountdown--;
-        queueTwoDepartureCountdown--;
-    }
-
-    printf("DROPPED PACKETS: %d\n", droppedPackets);
-    int successfulPackets = packetsArrived - droppedPackets;
-    printf("PACKETS ARRIVED: %d\n", successfulPackets);
+    double blockingProbability = (double)droppedPackets / (double)packetsArrived;
+    printf("BLOCKING PROBABILITY: %f\n", blockingProbability);
+    double finalAverageQueueLength = averageQueueLength / (double)timeElapsed;
+    printf("AVERAGE QUEUE LENGTH: %f\n", finalAverageQueueLength);
     return successfulPackets;
 }
 
