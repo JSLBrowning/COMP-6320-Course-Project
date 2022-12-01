@@ -4,4 +4,4 @@ Course project for COMP 6320: Design and Analysis of Computer Networks.
 
 ## Compile Instructions
 
-`gcc main_revision.c -lm -o main`
+`gcc main.c -lm -o main`

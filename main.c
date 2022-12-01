@@ -151,15 +151,18 @@ int randomQueueSelectionSystem(int lambda, int mu)
     arrivalTimer--;
     queue1Timer--;
     queue2Timer--;
-
-    // Debugging; Watch the simulation at a slower pace
-    //    sleep(1);
   }
 
   printf("DROPPED PACKETS: %d\n", droppedPackets);
   int successfulPackets = packetsArrived - droppedPackets;
   printf("PACKETS ARRIVED: %d\n", successfulPackets);
-  int averageSojournTime = timeElapsed / (successfulPackets / 2);
+  double blockingProbability = (double)droppedPackets / (double)packetsArrived;
+  printf("BLOCKING PROBABILITY: %f\n", blockingProbability);
+  int sizeOfArray = sizeof(queueLengths) / sizeof(queueLengths[0]);
+  int averageQueueLength = averageOfArray(queueLengths, sizeOfArray);
+  printf("AVERAGE QUEUE LENGTH: %d\n", averageQueueLength);
+  // Divide time elapsed by average number of packets in a given queue.
+  int averageSojournTime = timeElapsed / (successfulPackets / 2 / averageQueueLength);
   printf("AVERAGE SOJOURN TIME: %d\n", averageSojournTime);
   return averageSojournTime;
 }
@@ -177,6 +180,8 @@ int minQueueSelectionSystem(int lambda, int mu)
   int timeElapsed = 0;
   int packetsArrived = 0;
   int droppedPackets = 0;
+
+  int queueLengths[10000];
 
   while (packetsArrived < 10000 || (queue1 > 0 && queue2 > 0))
   {
@@ -255,10 +260,19 @@ int minQueueSelectionSystem(int lambda, int mu)
     queueTwoDepartureCountdown--;
   }
 
+  // Update queue lengths array.
+  queueLengths[timeElapsed] = (queue1 + queue2) / 2;
+
   printf("DROPPED PACKETS: %d\n", droppedPackets);
   int successfulPackets = packetsArrived - droppedPackets;
   printf("PACKETS ARRIVED: %d\n", successfulPackets);
-  int averageSojournTime = timeElapsed / (successfulPackets / 2);
+  double blockingProbability = (double)droppedPackets / (double)packetsArrived;
+  printf("BLOCKING PROBABILITY: %f\n", blockingProbability);
+  int sizeOfArray = sizeof(queueLengths) / sizeof(queueLengths[0]);
+  int averageQueueLength = averageOfArray(queueLengths, sizeOfArray);
+  printf("AVERAGE QUEUE LENGTH: %d\n", averageQueueLength);
+  // Divide time elapsed by average number of packets in a given queue.
+  int averageSojournTime = timeElapsed / (successfulPackets / 2 / averageQueueLength);
   printf("AVERAGE SOJOURN TIME: %d\n", averageSojournTime);
   return averageSojournTime;
 }
