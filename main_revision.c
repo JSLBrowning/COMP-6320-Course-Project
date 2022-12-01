@@ -15,6 +15,17 @@
 #include <unistd.h>
 #include <time.h>
 
+double averageOfArray(int array[], int size)
+{
+  int i;
+  double sum = 0;
+  for (i = 0; i < size; i++)
+  {
+    sum += array[i];
+  }
+  return sum / size;
+}
+
 double randomNumber()
 {
   // Generate a random number between 0 and 1 with a uniform distribution.
@@ -53,12 +64,15 @@ int randomQueueSelectionSystem(int lambda, int mu)
   int queue1 = 0;
   int queue2 = 0;
 
-  int packetsArrived = 0;
-  int droppedPackets = 0;
-
   int arrivalTimer = 0;
   int queue1Timer = -1;
   int queue2Timer = -1;
+
+  int timeElapsed = 0;
+  int packetsArrived = 0;
+  int droppedPackets = 0;
+
+  int queueLengths[10000];
 
   while (packetsArrived < 10000 || (queue1 > 0 || queue2 > 0))
   {
@@ -77,36 +91,38 @@ int randomQueueSelectionSystem(int lambda, int mu)
       arrivalTimer = randomPoisson(lambda);
 
       // Randomly select a queue, then add the packet if that queue is not full.
-        if (randomNumber() < 0.5)
+      if (randomNumber() < 0.5)
+      {
+        if (queue1 != 0 && queue1 < 10)
         {
-          if (queue1 != 0 && queue1 < 10)
-          {
-            queue1++;
-          }
-          else if (queue1 == 0)
-          {
-            queue1++;
-            queue1Timer = randomPoisson(mu);
-          } else if (queue1 == 10)
-          {
-            droppedPackets++;
-          }
+          queue1++;
         }
-        else
+        else if (queue1 == 0)
         {
-          if (queue2 != 0 && queue2 < 10)
-          {
-            queue2++;
-          }
-          else if (queue2 == 0)
-          {
-            queue2++;
-            queue2Timer = randomPoisson(mu);
-          } else if (queue2 == 10)
-          {
-            droppedPackets++;
-          }
+          queue1++;
+          queue1Timer = randomPoisson(mu);
         }
+        else if (queue1 == 10)
+        {
+          droppedPackets++;
+        }
+      }
+      else
+      {
+        if (queue2 != 0 && queue2 < 10)
+        {
+          queue2++;
+        }
+        else if (queue2 == 0)
+        {
+          queue2++;
+          queue2Timer = randomPoisson(mu);
+        }
+        else if (queue2 == 10)
+        {
+          droppedPackets++;
+        }
+      }
     }
 
     if (queue1Timer == 0)
@@ -127,6 +143,11 @@ int randomQueueSelectionSystem(int lambda, int mu)
       queue2Timer = randomPoisson(mu);
     }
 
+    // Update queue lengths array.
+    queueLengths[timeElapsed] = (queue1 + queue2) / 2;
+
+    // Decrement the timers.
+    timeElapsed++;
     arrivalTimer--;
     queue1Timer--;
     queue2Timer--;
@@ -138,7 +159,9 @@ int randomQueueSelectionSystem(int lambda, int mu)
   printf("DROPPED PACKETS: %d\n", droppedPackets);
   int successfulPackets = packetsArrived - droppedPackets;
   printf("PACKETS ARRIVED: %d\n", successfulPackets);
-  return successfulPackets;
+  int averageSojournTime = timeElapsed / (successfulPackets / 2);
+  printf("AVERAGE SOJOURN TIME: %d\n", averageSojournTime);
+  return averageSojournTime;
 }
 
 int minQueueSelectionSystem(int lambda, int mu)
@@ -146,9 +169,12 @@ int minQueueSelectionSystem(int lambda, int mu)
   // Since this is just a simulation, queues can just be ints.
   int queue1 = 0;
   int queue2 = 0;
+
   int arrivalCountdown = 0;
   int queueOneDepartureCountdown = 0;
   int queueTwoDepartureCountdown = 0;
+
+  int timeElapsed = 0;
   int packetsArrived = 0;
   int droppedPackets = 0;
 
@@ -222,6 +248,8 @@ int minQueueSelectionSystem(int lambda, int mu)
       queueTwoDepartureCountdown = randomPoisson(mu);
     }
 
+    // Decrement the timers.
+    timeElapsed++;
     arrivalCountdown--;
     queueOneDepartureCountdown--;
     queueTwoDepartureCountdown--;
@@ -230,7 +258,9 @@ int minQueueSelectionSystem(int lambda, int mu)
   printf("DROPPED PACKETS: %d\n", droppedPackets);
   int successfulPackets = packetsArrived - droppedPackets;
   printf("PACKETS ARRIVED: %d\n", successfulPackets);
-  return successfulPackets;
+  int averageSojournTime = timeElapsed / (successfulPackets / 2);
+  printf("AVERAGE SOJOURN TIME: %d\n", averageSojournTime);
+  return averageSojournTime;
 }
 
 int main(int argc, char *argv[])
