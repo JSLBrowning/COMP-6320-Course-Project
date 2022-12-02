@@ -145,7 +145,9 @@ int randomQueueSelectionSystem(int lambda, int mu)
     printf("BLOCKING PROBABILITY: %f\n", blockingProbability);
     double finalAverageQueueLength = averageQueueLength / (double)timeElapsed;
     printf("AVERAGE QUEUE LENGTH: %f\n", finalAverageQueueLength);
-    return successfulPackets;
+    double averageSojournTime = mu + (finalAverageQueueLength * mu);
+    printf("AVERAGE SOJOURN TIME: %f\n", averageSojournTime);
+    return averageSojournTime;
 }
 
 int minQueueSelectionSystem(int lambda, int mu)
@@ -241,7 +243,9 @@ int minQueueSelectionSystem(int lambda, int mu)
     printf("BLOCKING PROBABILITY: %f\n", blockingProbability);
     double finalAverageQueueLength = averageQueueLength / (double)timeElapsed;
     printf("AVERAGE QUEUE LENGTH: %f\n", finalAverageQueueLength);
-    return successfulPackets;
+    double averageSojournTime = mu + (finalAverageQueueLength * mu);
+    printf("AVERAGE SOJOURN TIME: %f\n", averageSojournTime);
+    return averageSojournTime;
 }
 
 int main(int argc, char *argv[])
